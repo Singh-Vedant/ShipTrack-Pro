@@ -1,0 +1,49 @@
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Node
+node_modules/
+
+# Maven / Java
+target/
+backend/target/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+backend/logs/
+backend/hs_err_pid*.log
+backend/replay_pid*.log
+
+# Environment files
+.env
+.env.*
+backend/.env
+backend/.env.*
+
+# Backend IDE files
+backend/.idea/
+backend/.vscode/
+backend/.classpath
+backend/.project
+backend/.settings/
+backend/.factorypath
+backend/.springBeans
+backend/.env
+backend/.env.*
+!backend/.env.example
+backend/logs/
+backend/*.log
+backend/hs_err_pid*.log
+backend/replay_pid*.log
+
+# Local properties
+backend/src/main/resources/application-local.properties
+backend/src/test/resources/application-local.properties
+
+# Temporary files
+backend/error.txt

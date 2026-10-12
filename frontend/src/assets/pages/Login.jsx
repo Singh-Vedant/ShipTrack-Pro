@@ -1,0 +1,182 @@
+import { useContext, useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/auth";
+import { login as loginApi } from "../services/api";
+function Login() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { updateAuth } = useContext(AuthContext);
+  const [form, setForm] = useState({ email: "admin@shiptrack.com", password: "admin123" });
+const [showPassword, setShowPassword] = useState(false);
+const [feedback, setFeedback] = useState({
+  type: "",
+  message: "",
+});
+useEffect(() => {
+  if (location.state?.message) {
+    setFeedback({
+      type: "success",
+      message: location.state.message,
+    });
+
+    window.history.replaceState({}, document.title);
+    return;
+  }
+
+  const params = new URLSearchParams(location.search);
+  const error = params.get("error");
+
+  if (error) {
+    setFeedback({
+      type: "error",
+      message: error,
+    });
+
+    navigate("/login", { replace: true });
+  }
+}, [location, navigate]);
+ const handleChange = (event) => {
+    setForm((current) => ({ ...current, [event.target.name]: event.target.value }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+ 
+ try {
+    const result = await loginApi(form);
+
+    if (result.status === 200) {
+        localStorage.setItem("token", result.data.token);
+        localStorage.setItem("role", result.data.role);
+        updateAuth(result.data.token, result.data.role);
+        setFeedback({
+            type: "success",
+            message: "Login successful."
+        });
+        navigate("/dashboard");
+    }
+} catch (error) {
+    setFeedback({
+        type: "error",
+        message: error.response?.data?.message || "Invalid email or password."
+    });
+}
+   
+  };
+
+ const handleGoogleLogin = () => {
+    window.location.href =
+        "http://localhost:8080/oauth2/authorization/google";
+};
+
+  return (
+    <div className="auth-page">
+      <section className="auth-panel">
+        <div className="auth-panel-content">
+          <div className="brand" style={{ paddingInline: 0 }}>
+            <div className="brand-mark">ST</div>
+            <div>
+              <div className="brand-title" style={{ color: "#132238" }}>
+                ShipTrack Pro
+              </div>
+              <div className="brand-subtitle" style={{ color: "#657184" }}>
+                Shipment visibility platform
+              </div>
+            </div>
+          </div>
+
+          <div className="eyebrow">Secure access</div>
+          <h1>Sign in to operations</h1>
+          <p className="subtle">
+            Use the seeded administrator account or a registered user to open the dashboard.
+          </p>
+
+          {feedback.message && <div className={`alert ${feedback.type}`}>{feedback.message}</div>}
+
+          <div className="auth-actions">
+            <button className="button secondary" type="button" onClick={handleGoogleLogin}>
+              Continue with Google
+            </button>
+          </div>
+
+          <div className="auth-divider">or use your email</div>
+
+          <form className="auth-form" onSubmit={handleSubmit}>
+            <div className="form-field">
+              <label htmlFor="email">Email</label>
+                <input
+                    className="input"
+                    id="email"
+                    name="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    required
+                    type="email"
+                />
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="password">Password</label>
+              <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                  <input
+                      className="input"
+                      id="password"
+                      name="password"
+                      value={form.password}
+                      onChange={handleChange}
+                      required
+                      type={showPassword ? "text" : "password"}
+                  />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: "absolute",
+                    right: "10px",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: "12px",
+                    color: "#657184",
+                    fontWeight: "500",
+                  }}
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
+            </div>
+
+            <button className="button primary" type="submit">
+              Sign in
+            </button>
+          </form>
+
+          <p className="auth-switch">
+            <Link to="/forgot-password">Forgot password?</Link>
+          </p>
+
+          <p className="auth-switch">
+            New user? <Link to="/register">Create an account</Link>
+          </p>
+        </div>
+      </section>
+
+      <section className="auth-visual">
+        <div className="auth-visual-inner">
+          <div className="auth-visual-copy">
+            <h2>From shipment to delivery proof, one control tower.</h2>
+            <p>
+              Real-time visibility
+              <br />
+              Smarter decisions
+              <br />
+              Happier customers
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+export default Login;
